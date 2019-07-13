@@ -64,7 +64,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{{ latest_reading.temperature | number }}&deg;C</td><td>{{ latest_reading.eventtime | date : 'medium' }}</td>
+                        <td>{{ latest_reading.temperature | number }}&deg;F</td><td>{{ latest_reading.eventtime | date : 'medium' }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -89,7 +89,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="t in temperatures">
-                        <td>{{ t.temperature | number }}&deg;C</td><td>{{ t.eventtime | date : 'medium' }}</td>
+                        <td>{{ t.temperature | number }}&deg;F</td><td>{{ t.eventtime | date : 'medium' }}</td>
                     </tr>
                 </tbody>
             </table> 
@@ -112,26 +112,28 @@
                     $http.post('/api/command/', {command: value});    
                 };
             
-                $http.get('/api/alerts').success(function(data) {
+                $http.get('/api/alerts').then(function(data) {
                     $scope.latest_alerts = data.reverse(); 
                 });
             
-                $http.get('/api/temperatures').success(function(result) {
+                $http.get('/api/temperatures').then(function(result) {
                     
-                    if(result.length > 0) {
-                        angular.forEach(result, function(x) {
+                    if(result.data.length > 0) {
+                        angular.forEach(result.data, function(x) {
 
-                            var utcSeconds = x.eventtime._;
+                            var utcSeconds = x.EventTime._;
                             var d = new Date(0);
                             d.setUTCSeconds(utcSeconds);
 
                             $scope.temperatures.push({
-                                deviceid: x.deviceid._,
-                                temperature: x.temperaturereading._,
+                                deviceid: x.DeviceId._,
+                                temperature: x.TemperatureReading._ * 1.8 + 32,
                                 eventtime: d
                             });
                         }); 
-                        $scope.temperatures.reverse();
+                        if($scope.temperatures && $scope.temperatures.reverse){
+                            $scope.temperatures.reverse();
+                        }
 
                         $scope.latest_reading = $scope.temperatures[0];
                     } 

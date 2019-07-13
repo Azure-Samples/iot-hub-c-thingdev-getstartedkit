@@ -35,7 +35,7 @@ void loop() {
 void initSerial() {
     // Start serial and initialize stdout
     Serial.begin(115200);
-    Serial.setDebugOutput(true);
+    //Serial.setDebugOutput(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,4 +74,3 @@ void initTime() {
         }
     }
 }
-
