@@ -26,13 +26,13 @@ var iotHubClient = ServiceClient.fromConnectionString(iotHubConnString);
 var alerts = [];
 var ehclient = EventHubClient.fromConnectionString(ehConnString, eventHubName)
 ehclient.createReceiver('$Default', '0', { startAfterTime: Date.now() })
-    .then(function(rx) {
-        rx.on('errorReceived', function(err) { console.log(err); });
-        rx.on('message', function(message) {
-            alerts.push(message.body);
-            alerts = alerts.slice(-5); // keep last 5
-        });
+.then(function(rx) {
+    rx.on('errorReceived', function(err) { console.log(err); });
+    rx.on('message', function(message) {
+        alerts.push(message.body);
+        alerts = alerts.slice(-5); // keep last 5
     });
+});
 
 // table storage
 var tableSvc = azure.createTableService(storageAcountName, storageAccountKey);
@@ -55,9 +55,9 @@ app.get('/api/alerts', function(req, res) {
     res.json(alerts);
 });
 
-app.get('/api/temperatures', function(req, res) {
+app.get('/api/temperatures', function (req, res, next) {
     var query = new azure.TableQuery()
-        .select(['eventtime', 'temperaturereading', 'deviceid'])
+        .select(['EventTime', 'TemperatureReading', 'DeviceId'])
         .where('PartitionKey eq ?', deviceId);
     var nextContinuationToken = null;
     var fullresult = { entries: [] };
@@ -97,7 +97,7 @@ app.post('/api/command', function(req, res) {
             console.error('Could not connect: ' + err.message);
         } else { // {"Name":"TurnFanOn","Parameters":""}
             var data = JSON.stringify({ "Name":command,"Parameters":null });
-            var message = new Message (data);
+            var message = new Message(data);
             console.log('Sending message: ' + data);
             iotHubClient.send(deviceId, message, printResultFor('send'));
         }
